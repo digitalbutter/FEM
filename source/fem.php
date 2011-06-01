@@ -200,12 +200,13 @@ function femCreateTemplate($templateName, $contents, $catId=0){
     $elementNamePrefix = $scriptProperties['elementNamePrefix'];
 
     $modx->log(MODX_LOG_LEVEL_INFO, 'Parsing template '.$templateName);
-    $template = $modx->getObject('modTemplate', array('templatename' => $templateName));
+    $template = $modx->getObject('modTemplate', array('description' => $templateName));
     if($template == null){
         $modx->log(MODX_LOG_LEVEL_INFO, "$templateName does not exist in db, creating...");
         $template = $modx->newObject('modTemplate');
     }
-    $template->set('templatename', $templateName);
+    $template->set('templatename', str_replace("_", " ",array_pop(explode(".",$templateName))) );
+    $template->set('description', $templateName);
     $template->set('category', $catId);
     $template->setContent($contents);
     $template->save();
