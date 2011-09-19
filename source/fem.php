@@ -31,7 +31,9 @@
  *
  * @package FileElementsMirror
  */
-
+if (!isset($_GET['flush'])){
+    return;
+}
 $modx->log(MODX_LOG_LEVEL_INFO, '-- Begin fem.php plugin --');
 
 function femCreateCat($catname, $parentCatId=0){
@@ -109,7 +111,7 @@ function femCreateTvs(array $tvNames, $template){
             }
             $modx->log(MODX_LOG_LEVEL_INFO, "Added tv template access to ".$template->get('templatename'));
 
-        //TODO: remove mappings not in template?
+            //TODO: remove mappings not in template?
         }/* elseif ( !empty($templateVarTemplate) ) {
             if ($templateVarTemplate->remove() === false) {
                 return $modx->error->failure($modx->lexicon('tvt_err_remove'));
@@ -212,6 +214,13 @@ function femCreateTemplate($templateName, $contents, $catId=0){
     $template->save();
     $tvNames= array();
     $chunkNames = array();
+    //@TODO Get lexicon tags in template content
+    $lexPregResults = array();
+    if ( preg_match_all('/\[\[\$([^ |^\:|^\]\]]*)/i', $template->getContent(), $lexPregResults) > 0 ){
+        $modx->log(MODX_LOG_LEVEL_DEBUG, 'Parsing lexicon entry in template content... ');
+        $lexNames = array_unique($lexPregResults[1]);
+
+    }
     // Get fem prefixed TVs in template content
     $tplPregResults = array();
     if ( preg_match_all('/\[\[\*('.preg_quote($elementNamePrefix, '/').'[^ |^\:|^\]\]]*)/i', $template->getContent(), $tplPregResults) > 0 ){
@@ -228,6 +237,7 @@ function femCreateTemplate($templateName, $contents, $catId=0){
         }
     }
     // Get fem prefixed chunk tags in template
+    /*
     if ( preg_match_all('/\[\[\$('.preg_quote($elementNamePrefix, '/').'[^ |^\?|^\]\]]*)/i', $contents, $chunkNames) > 0 ){
         $modx->log(MODX_LOG_LEVEL_DEBUG, 'Parsing chunks in template... ');
         foreach($chunkNames[1] as $chunkName){
@@ -235,7 +245,7 @@ function femCreateTemplate($templateName, $contents, $catId=0){
             femParseChunk($chunkName, $template);
         }
     };
-
+    */
     $modx->log(MODX_LOG_LEVEL_DEBUG, 'Done parsing template.');
 }
 
@@ -294,13 +304,11 @@ function femDoStuff($level, $path, $flag=null, $catString='', $parentCatId=0){
             } else {
                 // Map this file to a chunk/template:
                 switch ($flag){
-                    /* // Not used anymore, only chunks used in templates will be parsed.
+                    // Back in use - faster to parse all chunks than to search for them in templates, also some chunks are only used by snippets and backend
                     case $chunkFolder:
                         $chunkName = str_replace('.html', '', $elementNamePrefix.$catString.$pathPop);
                         femCreateChunk($chunkName, $currPath, $parentCatId);
                         break;
-
-                    */
                     case $templatesFolder:
                         $snippetName = str_replace('.html', '', $elementNamePrefix.$catString.$pathPop);
                         femCreateTemplate($snippetName, file_get_contents($currPath), $parentCatId);
@@ -321,5 +329,8 @@ function femDoStuff($level, $path, $flag=null, $catString='', $parentCatId=0){
 // MAIN
 $femStartTime = microtime(true);
 femDoStuff(0, $scriptProperties['elementsRoot']);
+$modx->log(MODX_LOG_LEVEL_INFO, 'Clearing cache...');
+if($modx->context->get('key') != "mgr")
+    $modx->cacheManager->clearCache();
 $modx->log(MODX_LOG_LEVEL_INFO, 'All done. ('.(microtime(true) - $femStartTime).' seconds)');
 $modx->log(MODX_LOG_LEVEL_INFO, '-- End fem.php plugin ;D --');
