@@ -1,6 +1,11 @@
 FEM - File Elements Mirroring plugin for MODx
 ==============================================
 
+
+Warning : File Elements Mirroring (FEM) is not supported anymore. The good news is that we have a new, better piece of code for that, for Revo 2.2.
+
+Please check mirror : https://github.com/digitalbutter/MODX-Mirror
+
 Introduction
 -------------
 
