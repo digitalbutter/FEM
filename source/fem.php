@@ -306,15 +306,15 @@ function femDoStuff($level, $path, $flag=null, $catString='', $parentCatId=0){
                 switch ($flag){
                     // Back in use - faster to parse all chunks than to search for them in templates, also some chunks are only used by snippets and backend
                     case $chunkFolder:
-                        $chunkName = str_replace('.html', '', $elementNamePrefix.$catString.$pathPop);
+                        $chunkName = str_replace('/.html$/', '', $elementNamePrefix.$catString.$pathPop);
                         femCreateChunk($chunkName, $currPath, $parentCatId);
                         break;
                     case $templatesFolder:
-                        $snippetName = str_replace('.html', '', $elementNamePrefix.$catString.$pathPop);
+                        $snippetName = str_replace('/.html$/', '', $elementNamePrefix.$catString.$pathPop);
                         femCreateTemplate($snippetName, file_get_contents($currPath), $parentCatId);
                         break;
                     case $snippetsFolder:
-                        $snippetName = str_replace('.php', '', $elementNamePrefix.$catString.$pathPop);
+                        $snippetName = str_replace('/.php$/', '', $elementNamePrefix.$catString.$pathPop);
                         femCreateSnippet($snippetName, file_get_contents($currPath), $parentCatId);
                         break;
                     default:
